@@ -1,7 +1,7 @@
 # Introduction to Room
 Room is an ORM - object relational mapping library. Room will map our database objects to Java objects. Using Room we will wrote less boilerplate and benefit from SQL validation at compile time.
 
-[[https://github.com/hennasingh/Android-Architecture-Components/tree/master/images/room_features.png|room features]]
+![room features](https://github.com/hennasingh/Android-Architecture-Components/tree/master/images/room_features.png)
 
 Room uses annotations and has 3 main components
 1. @Entity - to define our database tables
@@ -162,7 +162,7 @@ To add Task DAO we will define an abstract method that will returns it `public a
 
 But if you try to build your project at this stage, you will find that it does not compile, it seems like Room cannot figure out how to save one of the fields in the database
 
-[[https://github.com/hennasingh/Android-Architecture-Components/tree/master/images/room_errordate.png|room date error]]
+![room date error](https://github.com/hennasingh/Android-Architecture-Components/tree/master/images/room_errordate.png)
 
 On double clicking the error, we see the field that is causing the problem is updatedAt. Looking at documentation of different data types in SQL helps finding the exact prob and its solution .
 
@@ -257,13 +257,13 @@ Now that we know that our implementation works, we will disable queries in the m
 
 One way to get off the main thread is to make a runnable in a separate thread, which will look like this
 
-[[https://github.com/hennasingh/Android-Architecture-Components/tree/master/images/runnable_thread.png|runnable thread]]
+![runnable thread](https://github.com/hennasingh/Android-Architecture-Components/tree/master/images/runnable_thread.png)
 
 We create a new thread that uses a runnable. The runnable will perform our database logic, if its needed it will update the UI and finally we start the thread to execute the logic. 
 
 The issue with this approach is that UI cannot be modified from the newly created thread. But thanks to Architecture Components, we will handle UI in a completely different way. The temporary solution now would be to run on UI thread with a new runnable to update our UI which will look like below
 
-[[https://github.com/hennasingh/Android-Architecture-Components/tree/master/images/runnable_UI.png|UI on runnable]]
+![UI on runnable](https://github.com/hennasingh/Android-Architecture-Components/tree/master/images/runnable_UI.png)
 
 ### Executors
 
