@@ -440,7 +440,84 @@ using the method above we can retrieve list of task entry objects from our adapt
 ```
 ### Updating a Task
 
-This is similarly implementented like all other tasks but when an item is clicked for update. In our app we have onItemClickListener() which receives item ID as a parameter
+This is similarly implementented like all other tasks but when an item is clicked for update. In our app we have `onItemClickListener()` method which receives item ID as a parameter. We will put the item ID in the Intent and we will query the database to get that task.
+
+But if we observe our TaskDao interface above we do not have a method that could retrieve a task given its task ID so we will create one. Our new method will take ID as parameter and return taskEntry object. As this method is meant to retrieve our task from the database we will add ROOM query annotation with the apt SQL statement
+
+```java
+@Query("SELECT * FROM task where id= :id")
+    TaskEntry loadTaskById(int id);
+```
+Important feature of ROOM here is that ROOM includes SQL validation at compile time, so if you accidently write a wrong table/column name , the app build will fail.
+
+#### Steps to update
+1. Use `onItemClickListener()` method to retrieve the task ID and pass it as an extra to AddTask Activity with key EXTRA_TASK_ID
+```java
+@Override
+    public void onItemClickListener(int itemId) {
+        // Launch AddTaskActivity with itemId as extra for the key AddTaskActivity.EXTRA_TASK_ID
+        Intent addTask = new Intent(this, AddTaskActivity.class);
+        addTask.putExtra(AddTaskActivity.EXTRA_TASK_ID,itemId);
+        startActivity(addTask);
+    }
+```
+2. In Add Task Activity, retrieve the extra task id and assign it to id variable which will be used to retrieve the task from database
+3. Similar to previous steps we will use disk IO executor to get the appropriate task from database and then we will pass the task object received to `populateUI` method but we cannot update the UI from inside run method , so we will call `runOnUI` method
+
+```java
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra(EXTRA_TASK_ID)) {
+            mButton.setText(R.string.update_button);
+            if (mTaskId == DEFAULT_TASK_ID) {
+                mTaskId = intent.getExtras().getInt(EXTRA_TASK_ID,DEFAULT_TASK_ID);
+
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        final TaskEntry taskEntry = mDb.taskDao().loadTaskById(mTaskId);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                populateUI(taskEntry);
+                            }
+                        });
+                    }
+                });
+            }
+        }
+```
+4. Now for `updateUI` method, return if the task is null else set appropriate values to UI components (priority and edit text in this case)
+
+```java
+    private void populateUI(TaskEntry task) {
+   
+        if(task ==null) return;
+       
+       mEditText.setText(task.getDescription());
+        setPriorityInViews(task.getPriority());
+    }
+```
+5. Now we will also add update logic to `onSaveButtonClicked` method, we will write an if else statement in the run method so that task is only inserted if it matched the default ID else its updated else set the task ID and update the task
+
+```java
+         public void run() {
+                if (mTaskId == DEFAULT_TASK_ID) {
+                    mDb.taskDao().insertTask(taskEntry);
+                } else {
+                    taskEntry.setId(mTaskId);
+                    mDb.taskDao().updateTask(taskEntry);
+                }
+                finish();
+            }
+```
+
+## Observations on the current state of the App
+ The app works fine with all the CRUD operations, but it is not as good as it seems. If we look at our `onRetrieveTasks()` method in main activity and add some logging to it, we will see how the msg appears on the logcat everytime onResume is called. We would need to call this method only if there has been change in the database but for now its called everytime.
+ 
+ Most of the time we will be Re-quering the database to find out that there has not been any changes which is quite inefficient and generates an unnecessary waste of battery. It is here where Live Data comes to the rescue
+ 
+ ---------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 
