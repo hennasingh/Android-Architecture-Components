@@ -1,8 +1,7 @@
 # Introduction to Room
--------------------------------------------------------------------------------------------------------------------------------------------
 Room is an ORM - object relational mapping library. Room will map our database objects to Java objects. Using Room we will wrote less boilerplate and benefit from SQL validation at compile time.
 
-[[images/room_features.png|room features]]
+[[https://github.com/hennasingh/Android-Architecture-Components/tree/master/images/room_features.png|room features]]
 
 Room uses annotations and has 3 main components
 1. @Entity - to define our database tables
@@ -88,8 +87,8 @@ One of the limitations of room is that it can only use one constructor but we ha
 
 ### Additinal Resources
 
-[SQL Cheatsheet](https://d17h27t6h515a5.cloudfront.net/topher/2016/September/57ed880e_sql-sqlite-commands-cheat-sheet/sql-sqlite-commands-cheat-sheet.pdf)
-[W3School SQL Tutorial](https://www.w3schools.com/sql/)
+- [SQL Cheatsheet](https://d17h27t6h515a5.cloudfront.net/topher/2016/September/57ed880e_sql-sqlite-commands-cheat-sheet/sql-sqlite-commands-cheat-sheet.pdf)
+- [W3School SQL Tutorial](https://www.w3schools.com/sql/)
 
 ## Creating a DAO
 
@@ -120,7 +119,8 @@ Observations
 The fact that we can request objects back, is what makes room an object relational mapping library. The rest of the methods take a TaskEntry object as a parameter. The update task method annotated with update is set to replace in case of conflict
 
 ##  Creating a Database
-----------------------------------------------------------------------------------------------------------------------------------------We learnt to create database table (entity) and DAO (queries to access the table ) and now we will create a database that used both of them. The standard code to create a database is as follows
+
+We learnt to create database table (entity) and DAO (queries to access the table ) and now we will create a database that used both of them. The standard code to create a database is as follows
 
 ```java
 public abstract class AppDatabase extends RoomDatabase {
@@ -152,7 +152,7 @@ The database is created if it does not already exists, if it exist then a connec
 
 We annotate the class with database notation. In it we will provide the list of classes that we have annotated as entities for our database, in this case there is only 1 class.
 
- ```
+ ```java
  @Database(entities = {TaskEntry.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 ```
@@ -162,10 +162,11 @@ To add Task DAO we will define an abstract method that will returns it `public a
 
 But if you try to build your project at this stage, you will find that it does not compile, it seems like Room cannot figure out how to save one of the fields in the database
 
-[[images/room_errordate.png|room date error]]
+[[https://github.com/hennasingh/Android-Architecture-Components/tree/master/images/room_errordate.png|room date error]]
 
 On double clicking the error, we see the field that is causing the problem is updatedAt. Looking at documentation of different data types in SQL helps finding the exact prob and its solution .
-[Data Types](https://www.sqlite.org/datatype3.html)
+
+- [Data Types](https://www.sqlite.org/datatype3.html)
 
 From the documentation, we know date can be of 3 types 
 - Real, 
@@ -208,7 +209,7 @@ In the finished app, we need to implement the database operations to run asynchr
 
 For doing that we will call a method in our AppDatabase class when we create database instance.
 
-```
+```java
  sInstance = Room.databaseBuilder(context.getApplicationContext(),
              AppDatabase.class, AppDatabase.DATABASE_NAME)
              .allowMainThreadQueries()
@@ -250,19 +251,19 @@ Now that we have saved tasks in our database we would query the database to disp
     }
 ```
 
-###Threads and Runnables
+### Threads and Runnables
 
 Now that we know that our implementation works, we will disable queries in the main UI Thread. As we know certain operations can block the UI, we will run these operations asynchronously and in a separate thread.
 
 One way to get off the main thread is to make a runnable in a separate thread, which will look like this
 
-[[image/runnable_thread.png|runnable thread]]
+[[https://github.com/hennasingh/Android-Architecture-Components/tree/master/images/runnable_thread.png|runnable thread]]
 
 We create a new thread that uses a runnable. The runnable will perform our database logic, if its needed it will update the UI and finally we start the thread to execute the logic. 
 
 The issue with this approach is that UI cannot be modified from the newly created thread. But thanks to Architecture Components, we will handle UI in a completely different way. The temporary solution now would be to run on UI thread with a new runnable to update our UI which will look like below
 
-[[image/runnable_UI.png|UI on runnable]]
+[[https://github.com/hennasingh/Android-Architecture-Components/tree/master/images/runnable_UI.png|UI on runnable]]
 
 ### Executors
 
@@ -410,7 +411,7 @@ The OnSwipe() method of the call back will be called  when the user swipes. This
 - viewHolder for that row
 - integer that describes the swipe direction. We may want to use swipe direction to implement different actions. But in our case we will delete the task from our database in any case.
 
-####Steps to delete
+#### Steps to delete
 1. Get an instance of diskIO executor from the AppExecutors and use it to execute a new runnable
 2. We need to find out which task to delete, activity does not hold any references to the list of tasks. The object that holds that know how is our adapter. To access the lists of tasks we will need to add a public getTasks method to our adapter
 
