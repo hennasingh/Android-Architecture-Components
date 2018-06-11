@@ -1,7 +1,7 @@
 # Introduction to Room
 Room is an ORM - object relational mapping library. Room will map our database objects to Java objects. Using Room we will wrote less boilerplate and benefit from SQL validation at compile time.
 
-![room features](http://github.com/hennasingh/Android-Architecture-Components/tree/master/images/room_features.png)
+![room features](/images/room_features.png)
 
 Room uses annotations and has 3 main components
 1. @Entity - to define our database tables
