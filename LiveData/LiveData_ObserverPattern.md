@@ -17,6 +17,7 @@ Observers. Then the Observers will use to do whatever function they need to do, 
 ### Resources
 - [Live Data](https://developer.android.com/topic/libraries/architecture/livedata)
 - [Observer Pattern](https://en.wikipedia.org/wiki/Observer_pattern)
+- [Adding Components to Project](https://developer.android.com/topic/libraries/architecture/adding-components)
 
 ## Adding LiveData
 
@@ -94,6 +95,74 @@ UPDATE or DELETE , we do not need to observe changes in the database. For them w
 
 Every change in the database will trigger the onChanged method of the observer so we wont need to call retrieveTask method after
 deleting a task. We can also move retrieveTask method call to onCreate from onResume method and delete the onResume() method from activity.
-   
+
+### Adding LiveData to AddTaskActivity
+
+Now we will also make changes in AddTaskActivity and apply LiveData to `loadTaskById()` method when we update a task entry object. Now in TaskDao interface method signature will change like below
+
+**Before**
+```java
+    @Query("SELECT * FROM task WHERE id = :id")
+    TaskEntry loadTaskById(int id);
+```
+**After**
+```java
+    @Query("SELECT * FROM task WHERE id = :id")
+    LiveData<TaskEntry> loadTaskById(int id);
+```
+Now when you come back to AddTaskActivity, there is compiler error and we change the method sginature there as well and remove the exxecutor from place since LiveData run out of the main thread by default. We will update the UI in `onChanged()` method of the task observer. But in this case we do not want to receive updates, so we will remove the observer from our LiveData object.
+
+**Before**
+```java
+     Intent intent = getIntent();
+        if (intent != null && intent.hasExtra(EXTRA_TASK_ID)) {
+            mButton.setText(R.string.update_button);
+            if (mTaskId == DEFAULT_TASK_ID) {
+      
+                mTaskId = intent.getIntExtra(EXTRA_TASK_ID, DEFAULT_TASK_ID);
+
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        final TaskEntry task = mDb.taskDao().loadTaskById(mTaskId);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                              populateUI(task);
+                            }
+                        });
+                    }
+                });
+            }
+```
+**After**
+```java
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra(EXTRA_TASK_ID)) {
+            mButton.setText(R.string.update_button);
+            if (mTaskId == DEFAULT_TASK_ID) {
+                mTaskId = intent.getIntExtra(EXTRA_TASK_ID, DEFAULT_TASK_ID);
+
+                final LiveData<TaskEntry> task = mDb.taskDao().loadTaskById(mTaskId);
+                task.observe(this, new Observer<TaskEntry>() {
+                    @Override
+                    public void onChanged(@Nullable TaskEntry taskEntry) {
+                        task.removeObserver(this);
+                        populateUI(taskEntry);
+                    }
+                });
+            }
+        }
+```
+
+Now when we run the app and update a task it works as before but when we press the home button and come back to it, we cans see that we are not activity querying the database again, the screen stays.
+
+![Screen Stays At Update](/images/screenstays_atupdate.PNG)
+
+Usually, we do not need to remove the observer as we want LiveData to reflect the state of the underlying data. In our case we are doing a one-time load, and we don’t want to listen to changes in the database.
+
+Then, why are we using LiveData? Why don’t we keep the executor as it is instead?
+
+When we progress in the lesson we will move this logic to the ViewModel. There we will benefit from the rest of advantages of LiveData, even if we have used it for a one-time load.
    
 
