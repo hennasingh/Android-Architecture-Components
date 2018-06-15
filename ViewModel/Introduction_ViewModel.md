@@ -211,6 +211,10 @@ They can observe Lifecycle Owners, and get notified on lifecycle changes. LiveDa
 
 You can also implement your own LifecycleObservers to match your needs
 
+#### Additional Resources
+- [Handling Lifecycles with Lifecycle-Aware Components](https://developer.android.com/topic/libraries/architecture/lifecycle)
+- [Use Cases for lifecycle-aware components](https://developer.android.com/topic/libraries/architecture/lifecycle#use-cases)
+
 
 
 
