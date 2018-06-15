@@ -162,6 +162,59 @@ We will create an instance of our factory by passing database and task id to its
 Now , live data object is cast in the ViewModel. So, we can retrieve it again after rotation without needing to requery our database.
 
 ## Lifecycle Surprise
+Lets discuss the lifecycle of our activities and see how ViewModel takes care of everything
+
+We are in our AddTaskActivity and we click the add button to create a new task, the flow of data is like below
+1. Task is saved in our db
+2. Our LiveData in our main view model will be updated 
+3. That will notify the observer in the main activity via the onChange method
+4. Finally our UI will be updated
+![Expected Flow](/images/expectedFlow.PNG)
+
+But what happens if we are not in the activity that receives the update ? This is not uncommon and can happen because of various reasons
+but we will force it to happen in this case, in our `onSaveButtonClicked()` of the activity we will comment the code `finish()` at the end and run the app. We will see the app stays on the AddTask page and activity is not closed. What will be the flow in this case?
+
+![on deleting Finish code](/images/onFinishAdd.PNG)
+
+As per the expected flow
+1. The task should have been saved in the db
+2. The LiveData in our main view model should have been updated
+3. A call to the onChange method of the observer, that we have in our main activity **but** code in our activity cannot be executed if we are not in the activity *Activities cannot have their code run in the background*
+##### If we are still in the AddTask Activity, how does this effect us?
+
+![changed flow](/images/changedFlow.PNG)
+
+If LiveData has tried to call the onChange method of the observer in main activity, that code has not been executed and so the UI in main activity has also not been updated. But if we press the back button, surprisingly *we see the task is added* (this also happens if phone is shut down accidently, because my emulator did) **How is this possible ?**
+
+![On navigating back](/images/onHomeClick.PNG)
+
+This is possible because of another element of Android Architecture components called lifecycle. **How you may ask?** 
+We are using LiveData and it already supports lifecycle out of the box. LiveData is a lifecycle aware component, live data is able to know the state of its associated component which in our case is the activity.
+
+If the activity is started or resumed, then its considered active, and only in that case its observers will be notified. When we our in Add Task Activity when the database is updated, then main activity is not active, that means then live data will not notify the observers in main activity. Once we press the back button, main activity becomes active again and live data notifies its observers so the UI is updated.
+
+Another benefit of using live data is it also know when the state of the activity is destroyed, and when that happens it will automatically unsubscribe the observers for us to avoid memory leaks.
+
+So *How did LiveData manage to get these amazing super powers?*
+
+As we mentioned lifecycle is one of the architecture components and lifecycle will allow non-lifecycle objects to be lifecycle aware and that the different Android architecture components will decide to fit together as building blocks.
+
+Lifecycle has two interfaces; Lifecycle Owner and Lifecycle Observers
+
+![Lifecycle interfaces](images/lifecycle_interfaces.PNG)
+
+**Lifecycle Owners**
+They are objects that have a lifecycle like activities and fragments
+
+**Lifecycle Observers**
+They can observe Lifecycle Owners, and get notified on lifecycle changes. LiveData is lifecycle aware because it is LifecycleObserver. If you remember when we added live data in the class we called its observe method which took two parameters, we let it know which LifecycleOwner it should observe by passing it as a parameter.
+
+You can also implement your own LifecycleObservers to match your needs
+
+
+
+
+
 
 
 
