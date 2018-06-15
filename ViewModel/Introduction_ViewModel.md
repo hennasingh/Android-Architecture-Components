@@ -201,7 +201,7 @@ As we mentioned lifecycle is one of the architecture components and lifecycle wi
 
 Lifecycle has two interfaces; Lifecycle Owner and Lifecycle Observers
 
-![Lifecycle interfaces](/images/lifecycle_interfaces.PNG)
+![Lifecycle interfaces](/images/lifecycle_interfaces.png)
 
 **Lifecycle Owners**
 They are objects that have a lifecycle like activities and fragments
