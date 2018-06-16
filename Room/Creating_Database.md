@@ -10,6 +10,19 @@ Room uses annotations and has 3 main components
 
 This will include a list of entities and DAO and will allow us to create a new database or to acquire a connection to our db at runtime
 
+### Benefits of Using Room
+If your app handles non-trivial amounts of data, you can gain a number of benefits by storing at least some of that data locally using Room. The most common benefit is to optimize network connectivity, by caching relevant data to ensure users can still browse that content while they are offline. Any changes the user makes to content can later be synced to the server, once the device is back online.
+
+The core Android framework provides built-in support for working with raw SQL data. While the built-in APIs are very powerful, they also present a number of development challenges:
+- They are relatively low-level, and require a large amount of development time and effort.
+- Raw SQL queries are not verified at compile-time.
+- You must manually update SQL queries to reflect changes in your data graph. This process is unnecessarily time consuming, and error-prone.
+- You write and maintain a lot of boilerplate code to convert between SQL queries and data objects.
+
+Room is designed to abstract away the underlying database tables and queries, and encourage best-practice development patterns on Android.
+
+By default, Room doesn't allow you to issue database queries on the main thread to avoid poor UI performance. However querying on the main thread is enabled in sometimes for simplicity.
+
 ## Creating an Entity
 
 Adding Room dependencies to gradle file
