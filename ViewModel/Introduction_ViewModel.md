@@ -36,10 +36,20 @@ list of task entry objects wrap in a liveData object, we will create it as priva
 which will have a public getter and initialize this variable in our constructor getting an instance of AppDatabase.
 
 ```java
+public class MainViewModel extends AndroidViewModel {
+
+    private LiveData<List<TaskEntry>> tasks;
+
     public MainViewModel(@NonNull Application application) {
         super(application);
         tasks = AppDatabase.getInstance(this.getApplication()).taskDao().loadAllTasks();
     }
+
+    public LiveData<List<TaskEntry>> getTasks() {
+        return tasks;
+    }
+  }
+ }
 ```
 Now we will use this ViewModel in our MainActivity in `retriveTasks` method. Since we are querying the database in our ViewModel, we do
 not need to call the `loadAlltask` method from here. We will remove this and get the ViewModel by calling  ViewModels's providers of
