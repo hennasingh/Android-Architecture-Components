@@ -3,7 +3,7 @@
 To introduce the terminology, here is a short introduction to the Architecture Components and how they work together. Each component is explained more in their respective sections.
 
 This diagram shows a basic form of this architecture.
-![Basic AAC Diagram](/images/basic_aac_diagram)
+![Basic AAC Diagram](/images/basic_aac_diagram.png)
 
 *Entity:* When working with Architecture Components, the entity is an annotated class that describes a database table.
 
